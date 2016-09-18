@@ -1,0 +1,18 @@
+{
+  "name": "gltf-to-b3dm-convertor",
+  "version": "1.0.0",
+  "description": "Converts gltf file to b3dm and glb",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.4.6",
+    "cesium": "^1.25.0",
+    "proj4": "^2.3.15",
+    "xml2js": "^0.4.17",
+    "yargs": "^5.0.0"
+  }
+}
