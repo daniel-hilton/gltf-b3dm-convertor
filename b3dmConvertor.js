@@ -138,7 +138,10 @@ function getExtentByDegree(){
 
 
 // todo rename
-function fixPositionBuffer(buffer, offset, count, centerRtc,transformMatrix, currentExtent) {
+function fixPositionBuffer(buffer, offset, count, centerRtc,transformMatrix, currentExtent,accessor) {
+	let inf = Number.MAX_VALUE;
+	let minPoint = new Cesium.Cartesian3(inf,inf,inf)
+	let maxPoint = new Cesium.Cartesian3(-inf,-inf,-inf)
     for (let i = 0; i < count; i++) {
         tempCartesian3.x = buffer.readFloatLE(12 * i + offset);
         tempCartesian3.y = buffer.readFloatLE(12 * i + offset + 4);
@@ -152,7 +155,18 @@ function fixPositionBuffer(buffer, offset, count, centerRtc,transformMatrix, cur
         buffer.writeFloatLE(tempCartesian3.x, 12 * i + offset);
         buffer.writeFloatLE(tempCartesian3.y, 12 * i + offset + 4);
         buffer.writeFloatLE(tempCartesian3.z, 12 * i + offset + 8);
+		
+		minPoint.x = Math.min(minPoint.x,tempCartesian3.x)
+		maxPoint.x = Math.max(maxPoint.x,tempCartesian3.x)
+		minPoint.y = Math.min(minPoint.y,tempCartesian3.y)
+		maxPoint.y = Math.max(maxPoint.y,tempCartesian3.y)
+		minPoint.z = Math.min(minPoint.z,tempCartesian3.z)
+		maxPoint.z = Math.max(maxPoint.z,tempCartesian3.z)
     }
+	console.log(accessor.min);
+	accessor.min = [minPoint.x,minPoint.y,minPoint.z];
+	console.log(accessor.min);
+	accessor.min = [maxPoint.x,maxPoint.y,maxPoint.z];
 }
 
 function createSceneRtcExtention() {
@@ -363,7 +377,8 @@ function convertToB3dm() {
             return {
                 name: scene.bufferViews[accessor.bufferView].buffer,
                 offset: accessor.byteOffset + scene.bufferViews[accessor.bufferView].byteOffset,
-                count: accessor.count
+                count: accessor.count,
+				accessor: accessor
             }
         });
     const bufferPromises = [];
@@ -382,7 +397,7 @@ function convertToB3dm() {
 
             if (isB3dm) {
                 positionBuffers.filter(buffer => buffer.name == bufferId)
-                    .forEach(buffer => fixPositionBuffer(obj.contents, buffer.offset, buffer.count, centerRtc,transformMatrix,extent))
+                    .forEach(buffer => fixPositionBuffer(obj.contents, buffer.offset, buffer.count, centerRtc,transformMatrix,extent,buffer.accessor))
             }
 
         });
